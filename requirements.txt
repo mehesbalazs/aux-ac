@@ -1,0 +1,4 @@
+# Az auxcloud/ alatti kiemelt kliens függőségei (forrás: auxcloud/FORRAS.md).
+# Python 3.11+ szükséges (StrEnum, datetime.UTC); a projekt 3.12-vel készült.
+aiohttp==3.14.3
+pycryptodome==3.23.0
