@@ -76,7 +76,9 @@ A `jelszo_beallitas.sh` terminálból futtatva:
 
 1. létrehozza a `config.sh`-t a mintából, az e-mail címeddel;
 2. a jelszót a `~/.config/aux/jelszo` fájlba menti (600);
-3. kérésre a macOS Kulcskarikába is menti (`auxcloud` szolgáltatásnéven).
+3. kérésre a macOS Kulcskarikába is menti (`auxcloud` szolgáltatásnéven), majd
+   visszaolvassa: ha nem ugyanaz a jelszó került oda, mint a fájlba, a
+   bejegyzést törli, mert terminálból az elsőbbséget kapna.
 
 A jelszó nem jelenik meg a képernyőn, és parancssori argumentumba sem kerül.
 

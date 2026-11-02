@@ -3,7 +3,8 @@
 #   1. config.sh létrehozása a mintából, az e-mail címeddel (ha még nincs)
 #   2. az AC Freedom jelszó a ~/.config/aux/jelszo fájlba (600) — ebből
 #      olvas a script SSH-n át, ahol a Kulcskarika nem érhető el
-#   3. kérésre a macOS Kulcskarikába is (auxcloud szolgáltatásnéven)
+#   3. kérésre a macOS Kulcskarikába is (auxcloud szolgáltatásnéven), visszaolvasva:
+#      ha nem ugyanaz a jelszó került oda, mint a fájlba, a tételt törli
 #
 # A jelszó nem jelenik meg a képernyőn, nem kerül naplóba, és parancssori
 # argumentumba sem (a printf beépített parancs, nem külön folyamat).
@@ -85,9 +86,21 @@ IFS= read -r "VALASZ?A macOS Kulcskarikába is mentsem? (i/n) "
 if [[ "$VALASZ" == [iIyY]* ]]; then
   # A -w érték nélkül maga kéri be a jelszót, így az sem kerül argumentumba.
   # A -U a meglévő tételt frissíti.
-  echo "Most a security kéri be még egyszer (kétszer):"
+  echo "Most a security kéri be még egyszer UGYANAZT az AC Freedom jelszót, nem a Mac"
+  echo "jelszavát (a „password data for new item” és a „retype password” kérdésre):"
   security add-generic-password -U -s auxcloud -a "$EMAIL" -w
-  echo "Kulcskarikába mentve (auxcloud)."
+  # A security csak azt nézi, hogy kétszer ugyanazt írtad-e be, azt nem, hogy a
+  # fájlba mentett jelszót. Az eltérő tétel terminálból elsőbbséget kap, és ott
+  # minden belépést elrontana (SSH-n meg a fájl menne) — ezért visszaolvassuk.
+  if [[ "$(security find-generic-password -s auxcloud -a "$EMAIL" -w 2>/dev/null)" == "$(<"$HOME/.config/aux/jelszo")" ]]; then
+    echo "Kulcskarikába mentve és visszaolvasva (auxcloud)."
+  else
+    security delete-generic-password -s auxcloud -a "$EMAIL" >/dev/null 2>&1 || true
+    echo
+    echo "FIGYELEM: a Kulcskarikából visszaolvasott jelszó nem egyezik a fájlba"
+    echo "mentettel, ezért töröltem a Kulcskarika-bejegyzést. A jelszófájl marad a"
+    echo "forrás terminálból is. Ha mégis kell a Kulcskarika, futtasd újra a szkriptet."
+  fi
 elif security find-generic-password -s auxcloud -a "$EMAIL" >/dev/null 2>&1; then
   # Terminálból a Kulcskarika az első forrás: egy ott ragadt régi jelszóval
   # minden helyi futás bukna, miközben SSH-n a friss fájl menne.
